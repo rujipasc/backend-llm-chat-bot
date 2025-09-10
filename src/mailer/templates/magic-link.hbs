@@ -1,0 +1,91 @@
+<html lang='th'>
+  <head>
+    <meta charset='UTF-8' />
+    <title>Magic Login Link</title>
+  </head>
+  <body
+    style='font-family: Arial, sans-serif; background-color: #f5f7fa; margin:0; padding:40px;'
+  >
+    <table
+      align='center'
+      width='600'
+      cellpadding='0'
+      cellspacing='0'
+      border='0'
+      style='background-color:#ffffff; padding:20px; border-radius:8px;'
+    >
+      <tr>
+        <td align='center' style='padding:20px 0;'>
+          <img
+            src='https://firebasestorage.googleapis.com/v0/b/cg-ses-files-upload.appspot.com/o/hostingImage%2FCG_GROUP_Logo.png?alt=media&token=4d5677d1-b484-41ef-899b-3d592cff6b71'
+            alt='Company Logo'
+            style='max-width:240px; display:block;'
+          />
+        </td>
+      </tr>
+      <tr>
+        <td
+          style='font-family:Arial, sans-serif; font-size:14px; color:#333333;'
+        >
+          <h2 style='color:#333333; font-family:Arial, sans-serif;'>🔑 CG HR
+            Chatbot Login</h2>
+          <p style='margin:0 0 10px 0;'>สวัสดีคุณ <strong>{{name}}</strong>,</p>
+          <p style='margin:0 0 10px 0;'>รหัสพนักงานของคุณคือ
+            <strong>{{employeeId}}</strong></p>
+          <p style='margin:0 0 20px 0;'>คลิกปุ่มด้านล่างเพื่อเข้าสู่ระบบ CG HR
+            Chatbot</p>
+        </td>
+      </tr>
+      <!-- ปุ่ม -->
+      <tr>
+        <td align='center' style='padding:20px 0;'>
+          <table cellpadding='0' cellspacing='0' border='0'>
+            <tr>
+              <td
+                align='center'
+                bgcolor='#000000'
+                style='border-radius:4px; background-color:#000000;'
+              >
+                <a
+                  href='{{link}}'
+                  target='_blank'
+                  style='display:inline-block; padding:12px 24px; font-size:14px; font-weight:bold;
+                          font-family:Arial, sans-serif; color:#ffffff; text-decoration:none;
+                          background-color:#000000; border-radius:4px;'
+                >
+                  เข้าสู่ระบบ
+                </a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <!-- TTL -->
+      <tr>
+        <td
+          style='font-family:Arial, sans-serif; font-size:12px; color:#666666; text-align:center;'
+        >
+          ลิงก์นี้จะหมดอายุใน
+          <strong>{{ttl}} นาที</strong>
+        </td>
+      </tr>
+      <tr>
+        <td style='padding:20px 0;'>
+          <hr style='border:none; border-top:1px solid #eeeeee;' />
+        </td>
+      </tr>
+      <tr>
+        <td
+          style='font-family:Arial, sans-serif; font-size:12px; color:#888888;'
+        >
+          หากคุณไม่ได้ร้องขอการเข้าสู่ระบบนี้ กรุณาลบอีเมลนี้ทิ้ง<br /><br />
+          ---<br /><br />
+          Dear
+          <strong>{{name}}</strong>,<br />
+          Click the button above to login. This link will expire in
+          <strong>{{ttl}} minutes</strong>.
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

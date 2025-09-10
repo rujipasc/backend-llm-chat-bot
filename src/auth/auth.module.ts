@@ -12,6 +12,7 @@ import { JwtStrategy } from './jwt.strategy';
 import { MagicLink } from './entities/magic-link.entity';
 import { User } from '../users/entities/user.entity';
 import { UsersModule } from '../users/users.module';
+import { AppMailerModule } from 'src/mailer/mailer.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { UsersModule } from '../users/users.module';
       }),
     }),
     UsersModule,
+    AppMailerModule,
     TypeOrmModule.forFeature([MagicLink, User]),
   ],
   controllers: [AuthController],

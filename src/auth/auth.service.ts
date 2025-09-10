@@ -14,6 +14,7 @@ import { ConfigService } from '@nestjs/config';
 import { MagicLink } from './entities/magic-link.entity';
 import { User } from '../users/entities/user.entity';
 import type { AccessTokenPayload } from './jwt.strategy';
+import { MailerCustomService } from 'src/mailer/mailer.service';
 
 @Injectable()
 export class AuthService {
@@ -28,6 +29,7 @@ export class AuthService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
+    private readonly mailer: MailerCustomService,
   ) {
     this.MAGIC_TTL_MIN = parseInt(
       this.config.get('MAGIC_TOKEN_TTL_MIN') ?? '15',
@@ -39,7 +41,6 @@ export class AuthService {
       this.config.get('APP_BASE_URL') ?? 'http://localhost:3000';
   }
 
-  // Request a magic link for email login
   async requestMagic(email: string, employeeId?: string) {
     const user = await this.userRepository.findOne({ where: { email } });
     if (!user) throw new BadRequestException('User not found');
@@ -47,7 +48,6 @@ export class AuthService {
       throw new BadRequestException('Invalid employeeId');
     }
 
-    // Invalidate previous unused links for this user
     await this.magicLinkRepository.delete({
       user: { id: user.id },
       usedAt: IsNull(),
@@ -60,9 +60,22 @@ export class AuthService {
     await this.magicLinkRepository.save(
       this.magicLinkRepository.create({ user, tokenHash, expiresAt }),
     );
+
     const link = `${this.appBaseUrl}/api/v1/auth/verify-magic?token=${token}`;
-    // In production, send the link via email instead of returning the token
-    return { ok: true, link, expiresAt };
+
+    // ✅ ส่งเมล
+    await this.mailer.sendMagicLink(
+      user.email,
+      user.employeeId,
+      link,
+      this.MAGIC_TTL_MIN,
+    );
+
+    // ✅ return แยกตาม env
+    if (this.config.get('NODE_ENV') === 'production') {
+      return { ok: true, expiresAt };
+    }
+    return { ok: true, link, expiresAt }; // dev
   }
 
   // Verify magic link token and issue JWTs
@@ -112,7 +125,17 @@ export class AuthService {
 
     const user = await this.userRepository.findOne({
       where: { id: payload.sub },
-      select: ['id', 'email', 'refreshTokenHash'],
+      // ต้องใช้ฟิลด์ให้ครบสำหรับ payload ใหม่ ไม่งั้น token หลัง refresh จะขาดข้อมูล
+      select: [
+        'id',
+        'email',
+        'refreshTokenHash',
+        'employeeId',
+        'role',
+        'company',
+        'bu',
+        'pg',
+      ],
     });
     if (!user) throw new NotFoundException('User not found');
     if (!user.refreshTokenHash)
