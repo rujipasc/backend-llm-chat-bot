@@ -36,6 +36,9 @@ export class User {
   @Column({ nullable: true })
   pg?: string;
 
+  @Column({ type: 'text', nullable: true, select: false })
+  refreshTokenHash?: string | null;
+
   @CreateDateColumn()
   createdAt: Date;
 
