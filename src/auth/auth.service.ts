@@ -42,7 +42,11 @@ export class AuthService {
   }
 
   async requestMagic(email: string, employeeId?: string) {
-    const user = await this.userRepository.findOne({ where: { email } });
+    const user = await this.userRepository.findOne({
+      where: { email },
+      // ต้องเลือก firstName/lastName เพราะคอลัมน์ถูกตั้ง select:false
+      select: ['id', 'email', 'employeeId', 'firstName', 'lastName'],
+    });
     if (!user) throw new BadRequestException('User not found');
     if (employeeId && user.employeeId !== employeeId) {
       throw new BadRequestException('Invalid employeeId');
@@ -67,6 +71,8 @@ export class AuthService {
     await this.mailer.sendMagicLink(
       user.email,
       user.employeeId,
+      user.firstName ?? '',
+      user.lastName ?? '',
       link,
       this.MAGIC_TTL_MIN,
     );
@@ -99,12 +105,27 @@ export class AuthService {
 
     if (!matched) throw new UnauthorizedException('Invalid or expired token');
 
+    const user = await this.userRepository.findOne({
+      where: { id: matched.user.id },
+      select: [
+        'id',
+        'employeeId',
+        'email',
+        'role',
+        'bu',
+        'company',
+        'pg',
+        'firstName',
+        'lastName',
+      ],
+    });
+
+    if (!user) throw new NotFoundException('User not found');
     // Mark as used (เฉพาะ production)
     if (this.config.get('NODE_ENV') !== 'development') {
       matched.usedAt = new Date();
       await this.magicLinkRepository.save(matched);
     }
-    const user = matched.user;
     const tokens = await this.issueTokens(user);
     return { ok: true, user, ...tokens };
   }

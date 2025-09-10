@@ -36,6 +36,12 @@ export class User {
   @Column({ nullable: true })
   pg?: string;
 
+  @Column({ nullable: true, select: false })
+  firstName?: string;
+
+  @Column({ nullable: true, select: false })
+  lastName?: string;
+
   @Column({ type: 'text', nullable: true, select: false })
   refreshTokenHash?: string | null;
 

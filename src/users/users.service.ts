@@ -54,6 +54,25 @@ export class UsersService {
     return this.repo.findOne({ where: { employeeId } });
   }
 
+  async findOneWithNames(id: number) {
+    return this.repo.findOne({
+      where: { id },
+      select: [
+        'id',
+        'employeeId',
+        'email',
+        'role',
+        'bu',
+        'company',
+        'pg',
+        'firstName',
+        'lastName',
+        'createdAt',
+        'updatedAt',
+      ],
+    });
+  }
+
   async update(id: number, data: Partial<User>) {
     try {
       await this.repo.update(id, data);

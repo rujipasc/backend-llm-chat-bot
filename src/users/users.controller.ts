@@ -7,13 +7,28 @@ import {
   Param,
   Delete,
   NotFoundException,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import type { Request } from 'express';
+import type { AccessTokenPayload } from '../auth/jwt.strategy';
+
+type AuthedRequest = Request & { user: AccessTokenPayload };
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly user: UsersService) {}
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  async getMe(@Req() req: AuthedRequest) {
+    const user = await this.user.findOneWithNames(req.user.sub);
+    if (!user) throw new NotFoundException('User not found');
+    return { ok: true, user };
+  }
 
   @Get()
   findAll() {

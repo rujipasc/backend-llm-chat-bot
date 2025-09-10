@@ -8,15 +8,18 @@ export class MailerCustomService {
   async sendMagicLink(
     email: string,
     employeeId: string,
+    firstName: string,
+    lastName: string,
     link: string,
     ttl: number,
   ) {
+    const fullName = `${firstName ?? ''} ${lastName ?? ''}`.trim() || email;
     await this.mailer.sendMail({
       to: email,
       subject: '🔑 HR Chatbot Login Link',
       template: 'magic-link', // อ้างถึงไฟล์ magic-link.hbs ใน templates dir
       context: {
-        name: email,
+        fullName,
         employeeId,
         link,
         ttl,
