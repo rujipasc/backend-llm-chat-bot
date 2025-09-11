@@ -1,22 +1,23 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.getHttpAdapter().getInstance().disable('x-powered-by');
   app.setGlobalPrefix('api/v1');
 
-  // Basic CORS for POC; tighten in production
-  // const config = app.get(ConfigService);
-  // const origin = config.get<string>('APP_BASE_URL') ?? true;
-  app.enableCors({
-    origin: [
-      'http://localhost:4001', // frontend local
-      'http://10.2.28.93:4001', // frontend ใน LAN
-    ],
-    credentials: true,
-  });
+  // CORS origins from env (CORS_ORIGINS=comma,separated)
+  const config = app.get(ConfigService);
+  const originsStr = config.get<string>('CORS_ORIGINS');
+  const origins = originsStr
+    ? originsStr
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : ['http://localhost:4001'];
+  app.enableCors({ origin: origins, credentials: true });
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -25,6 +26,7 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
-  await app.listen(process.env.PORT ?? 3000);
+  const port = Number(config.get('PORT') ?? process.env.PORT ?? 3000);
+  await app.listen(port);
 }
 void bootstrap();
